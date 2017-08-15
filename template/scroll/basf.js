@@ -1,6 +1,6 @@
 exports.news = {
 	scroll: {top: 7000,left: 0},
-	htmlEncode: false,
+	htmlEncode: true,
 	body: `$('.row.pressrelease-content')`,
 	title: `find('.category-title').find('.col-md-12.col-xs-12').eq(1).find('h2').find('a').html()`,
 	content: `$(".col-md-8.col-content").html()`,
