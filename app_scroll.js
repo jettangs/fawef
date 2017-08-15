@@ -61,8 +61,7 @@ q.drain = () => {
 }
 
 (async () => {
-  try{
-  	let error_count = 0
+  	
     const instance = await phantom.create(['--load-images=no']);
     const page = await instance.createPage();
     await page.on("onResourceRequested", function(requestData) {
@@ -83,14 +82,9 @@ q.drain = () => {
     await sleep(2000)
     console.log("continue")
 
-    // url.length
-    console.log(`Page: ${t.pages.length}`)
-    
-    const status = await page.open(t.pages[i]);
     // await page.property('scrollPosition', {
     //   top: 100
     // })
-    console.log(`${url[i]} => ${status}`);
     const content = await page.property('content');
     // console.log("content ->"+content)
     const $ = cheerio.load(content);
@@ -100,29 +94,40 @@ q.drain = () => {
     console.log(`News per page: ${items.length}`)
     
     for(let i = 0; i < items.length; i++) {
-        let news = {}
-        let title = eval(`items.eq(i).${t.news.title}`)
-        title = title? title : "no title"
-        news['title'] = t.news.htmlEncode? he.decode(title) : title
-        //console.log("title ->"+news.title)
+        let error_count = 0
+        try{
+            let news = {}
+            let title = eval(`items.eq(i).${t.news.title}`)
+            title = title? title : "no title"
+            news['title'] = t.news.htmlEncode? he.decode(title) : title
+            //console.log("title ->"+news.title)
 
-        let description = eval(`items.eq(i).`+t.news.description)
-        description = description? description : 'no description'
-        news['description'] = t.news.htmlEncode? he.decode(description) : description
+            let description = eval(`items.eq(i).`+t.news.description)
+            description = description? description : 'no description'
+            news['description'] = t.news.htmlEncode? he.decode(description) : description
 
-        //console.log("description ->"+news.description)
+            //console.log("description ->"+news.description)
 
-        let link = eval(`items.eq(i).`+t.news.link)
-        news['link'] = link? t.news.linkPrefix+link : "no link"
-        //console.log("link ->"+news.link)
+            let link = eval(`items.eq(i).`+t.news.link)
+            news['link'] = link? t.news.linkPrefix+link : "no link"
+            //console.log("link ->"+news.link)
 
-        let cover = eval(`items.eq(i).`+t.news.cover)
-        news['cover'] = cover? t.news.coverPrefix+cover : 'no cover'
-        //console.log("cover ->"+news.cover)
+            let cover = eval(`items.eq(i).`+t.news.cover)
+            news['cover'] = cover? t.news.coverPrefix+cover : 'no cover'
+            //console.log("cover ->"+news.cover)
 
-        news['author'] = t.news.author
-        news['host'] = t.news.host
-        news_list.push(news)
+            news['author'] = t.news.author
+            news['host'] = t.news.host
+            news_list.push(news)
+
+        }catch(e){
+            console.log(e)
+            error_count++
+            if(error_count > 7) {
+                fs.writeFileSync('fail.url',t.pages[i]+'\n')
+                await instance.exit();
+            }
+        }
     }
     
     await instance.exit();
@@ -131,18 +136,16 @@ q.drain = () => {
     news_list.forEach(news => {
         q.push(news, err => { if(err) console.log(err) })
     })
-    
-  }catch(err){
-    console.log(err)
-    error_count++
-    if(error_count > 7) {
-        fs.writeFileSync('fail.url',t.pages[i]+'\n')
-        await instance.exit();
-    }
-  }
   
 })()
 
+const sleep = ms => {
+    return new Promise(function (resolve, reject) {
+        setTimeout(function () {
+            resolve();
+        }, ms);
+    })
+}
 
 
 

@@ -7,7 +7,6 @@ const phantom = require('phantom');
 const Sequelize = require('sequelize')
 const config = require('./config')
 const t = require('./template/static/lanxess')
-
 const sequelize = new Sequelize(config.db);
 
 const News = sequelize.define('news', {
@@ -77,7 +76,7 @@ q.drain = () => {
             const content = await page.property('content');
             // console.log("content ->"+content)
             const $ = cheerio.load(content);
-            let items = eval(t.news.body)
+            let items = eval(t.news.body);
             //page.render('page'+i+'.jpg',{format: 'jpeg', quality: '60'})
             //items.length
             console.log(`News per page: ${items.length}`)
@@ -121,9 +120,6 @@ q.drain = () => {
 
   
 })()
-
-
-
 
 
 
