@@ -73,7 +73,7 @@ q.drain = () => {
             // await page.property('scrollPosition', {
             //   top: 100
             // })
-            console.log(`${url[i]} => ${status}`);
+            console.log(`${t.pages[i]} => ${status}`);
             const content = await page.property('content');
             // console.log("content ->"+content)
             const $ = cheerio.load(content);
